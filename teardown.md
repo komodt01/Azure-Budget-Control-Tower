@@ -1,6 +1,7 @@
-# Azure Budget Management - Teardown Guide
+### Phase 1: Disable Notifications
+```# Azure Budget Control Tower - Teardown Guide
 
-This guide provides step-by-step instructions for safely removing the Azure Budget Management infrastructure.
+This guide provides step-by-step instructions for safely removing the Azure Budget Control Tower infrastructure.
 
 ## 🚨 Pre-Teardown Checklist
 
@@ -9,9 +10,8 @@ Before proceeding with teardown, ensure:
 - [ ] **Export budget reports** and historical data if needed for auditing
 - [ ] **Notify stakeholders** about the budget monitoring removal
 - [ ] **Document current budget thresholds** for future reference
-- [ ] **Verify no active Logic App workflows** are processing critical alerts
-- [ ] **Backup Key Vault secrets** if they contain important automation credentials
-- [ ] **Check for dependencies** - other systems relying on action groups or Logic Apps
+- [ ] **Verify no active alerts** are processing
+- [ ] **Check dependencies** - ensure no other systems rely on the action groups
 
 ## 📋 Teardown Order
 
@@ -51,51 +51,18 @@ az consumption budget delete \
   --budget-name "monthly-subscription-budget"
 ```
 
-#### 3.2 Logic Apps and Automation
-```bash
-# Delete Logic App
-az logic workflow delete \
-  --resource-group "rg-budget-management-prod" \
-  --name "budget-automation-logic-app"
-```
-
-#### 3.3 Action Groups
+#### 3.2 Action Groups
 ```bash
 # Delete Action Group
 az monitor action-group delete \
-  --resource-group "rg-budget-management-prod" \
-  --name "budget-alert-action-group"
+  --resource-group "rg-budget-control-tower" \
+  --name "budget-alerts"
 ```
 
-#### 3.4 Policy Assignments
-```bash
-# List policy assignments
-az policy assignment list --query "[?displayName=='Budget Cost Control - Allowed VM SKUs']"
-
-# Delete policy assignment
-az policy assignment delete --name "budget-cost-control"
-```
-
-#### 3.5 Storage and Key Vault
-```bash
-# Delete Key Vault (soft delete enabled by default)
-az keyvault delete \
-  --name "budget-auto-kv-2025" \
-  --resource-group "rg-budget-management-prod"
-
-# Purge Key Vault (permanent deletion)
-az keyvault purge --name "budget-auto-kv-2025"
-
-# Delete Storage Account
-az storage account delete \
-  --name "budgetauto2025storage" \
-  --resource-group "rg-budget-management-prod"
-```
-
-#### 3.6 Resource Group
+#### 3.3 Resource Group
 ```bash
 # Delete the entire resource group (last step)
-az group delete --name "rg-budget-management-prod" --yes
+az group delete --name "rg-budget-control-tower" --yes
 ```
 
 ## 🔍 Verification Steps
